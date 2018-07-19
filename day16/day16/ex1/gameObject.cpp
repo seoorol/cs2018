@@ -237,6 +237,7 @@ namespace cs2018prj {
 				}
 				break;
 			case 100:
+				
 				break;
 			default:
 				break;
@@ -274,6 +275,7 @@ namespace cs2018prj {
 			switch (pObj->m_nFSM)
 			{
 			case 0:
+			
 				break;
 			case 10:
 				pObj->m_bActive = true;
@@ -308,6 +310,10 @@ namespace cs2018prj {
 				}
 			}
 			break;
+			case 100:
+				
+				break;
+
 			default:
 				break;
 			}

@@ -1,0 +1,11 @@
+{
+    "name": "seo",
+    "distance": 29.7,
+    "national_code": 82,
+    "item": {
+        "wepon": "dagger",
+        "ap": 25
+    },
+    "comm": true,
+        "etc" :  [4,"sword",6,3,3,4]
+}
