@@ -7,6 +7,7 @@ namespace cs2018prj {
 			double m_posx, m_posy;
 			//CHAR_INFO m_Spr;
 			void *m_pWepon;
+			void *m_psub;
 			tge_sprite::S_SPRITE_OBJECT *m_pSprite;
 			irr::core::vector2df m_translation;
 			int m_nFSM;
@@ -19,6 +20,27 @@ namespace cs2018prj {
 		void Render(S_GAMEOBJECT *pObj, CHAR_INFO *pTargetBuf);
 	}
 	namespace ailenObject {
+		struct S_GAMEOBJECT {
+			double m_dbSpeed;
+			double m_posx, m_posy;
+			irr::core::vector2df m_vDir;
+			//CHAR_INFO m_Spr;
+			tge_sprite::S_SPRITE_OBJECT *m_pSprite;
+			irr::core::vector2df m_translation;
+			double m_dbWorkTick;
+			cs2018prj::playerObject::S_GAMEOBJECT *m_pTargetObj;
+			void *m_pWepon;
+			
+			int m_nFSM;
+			bool m_bActive;
+		};
+
+		void Init(S_GAMEOBJECT *pObj, double _x, double _y, double _dbSpeed,
+			tge_sprite::S_SPRITE_OBJECT *pSpr);
+		void Apply(S_GAMEOBJECT *pObj, double _deltaTick);
+		void Render(S_GAMEOBJECT *pObj, CHAR_INFO *pTargetBuf);
+	}
+	namespace mapObject {
 		struct S_GAMEOBJECT {
 			double m_dbSpeed;
 			double m_posx, m_posy;
@@ -57,6 +79,24 @@ namespace cs2018prj {
 		void Render(S_GAMEOBJECT *pObj, CHAR_INFO *pTargetBuf);
 	}
 	namespace attackObject_frameBurster {
+		struct S_GAMEOBJECT {
+			double m_dbSpeed;
+			double m_posx, m_posy;
+			irr::core::vector2df m_vDir;
+			tge_sprite::S_SPRITE_OBJECT *m_pSprite;
+			irr::core::vector2df m_translation;
+			double m_dbWorkTick;
+			void *m_pTargetObj;
+			int m_nFSM;
+			bool m_bActive;
+		};
+
+		void Init(S_GAMEOBJECT *pObj, double _x, double _y, double _dbSpeed,
+			tge_sprite::S_SPRITE_OBJECT *pSpr);
+		void Apply(S_GAMEOBJECT *pObj, double _deltaTick);
+		void Render(S_GAMEOBJECT *pObj, CHAR_INFO *pTargetBuf);
+	}
+	namespace attackObject_poison {
 		struct S_GAMEOBJECT {
 			double m_dbSpeed;
 			double m_posx, m_posy;

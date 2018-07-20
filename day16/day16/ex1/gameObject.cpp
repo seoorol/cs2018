@@ -17,6 +17,7 @@ namespace cs2018prj {
 			pObj->m_pSprite = pSpr;
 			pObj->m_bActive = true;
 			pObj->m_pWepon = NULL;
+			pObj->m_psub = NULL;
 			//pObj->m_Spr = _spr;
 		}
 
@@ -43,6 +44,19 @@ namespace cs2018prj {
 						pWepon->m_nFSM = 10;
 						pWepon->m_posx = pObj->m_posx;
 						pWepon->m_posy = pObj->m_posy - 2;
+					}
+				}
+			}
+
+			if (TGE::input::g_KeyTable['D']) {
+				if (pObj->m_psub) {
+					cs2018prj::attackObject_poison::S_GAMEOBJECT *psub =
+						(cs2018prj::attackObject_poison::S_GAMEOBJECT *)pObj->m_psub;
+					if (psub->m_nFSM == 0) {
+						psub->m_nFSM = 10;
+						psub->m_posx = pObj->m_posx - 10;
+						psub->m_posy = pObj->m_posy - 2;
+						
 					}
 				}
 			}
@@ -126,8 +140,7 @@ namespace cs2018prj {
 				pObj->m_posx += (pObj->m_dbSpeed * _deltaTick) * pObj->m_vDir.X;
 				pObj->m_posy += (pObj->m_dbSpeed * _deltaTick) * pObj->m_vDir.Y;
 				pObj->m_dbWorkTick += _deltaTick;
-				if (pObj->m_dbWorkTick > 3.5) {
-					//pObj->m_nFSM = 10;
+				if (pObj->m_dbWorkTick > 3) {					
 					pObj->m_vDir.rotateBy(180);
 					pObj->m_dbWorkTick = 0;
 				}
@@ -166,7 +179,8 @@ namespace cs2018prj {
 				pObj->m_bActive = false;
 				pObj->m_nFSM = 101;
 				break;
-			case 101:
+			case 101:				
+				 
 				break;
 			default:
 				break;
@@ -182,6 +196,72 @@ namespace cs2018prj {
 			}
 		}
 	}
+
+	namespace mapObject {
+		void Init(S_GAMEOBJECT *pObj, double _x, double _y, double _dbSpeed,
+			tge_sprite::S_SPRITE_OBJECT *pSpr)
+		{
+			pObj->m_posx = _x;
+			pObj->m_posy = _y;
+			pObj->m_dbSpeed = _dbSpeed;
+			pObj->m_nFSM = 0;
+			pObj->m_pSprite = pSpr;
+			pObj->m_vDir = irr::core::vector2df(1, 0);
+			pObj->m_pTargetObj = NULL;
+			pObj->m_pWepon = NULL;
+		}
+
+		void Apply(S_GAMEOBJECT *pObj, double _deltaTick)
+		{
+			switch (pObj->m_nFSM)
+			{
+			case 0:
+				pObj->m_nFSM = 10;
+				pObj->m_dbWorkTick = 0;
+				break;
+			case 10: //순찰모드 
+				
+				pObj->m_posy += (pObj->m_dbSpeed * _deltaTick) * pObj->m_vDir.Y;
+				pObj->m_dbWorkTick += _deltaTick;
+				if (pObj->m_dbWorkTick > 1) {
+					pObj->m_vDir.rotateBy(90);
+					pObj->m_dbWorkTick = 0;
+				}
+				if (pObj->m_pTargetObj) {
+					irr::core::vector2df a(pObj->m_posy);
+					irr::core::vector2df b(pObj->m_pTargetObj->m_posy);
+					double fDist = a.getDistanceFrom(b);
+					if (fDist < 10) {
+						pObj->m_nFSM = 20;
+					}
+				}
+				break;
+			
+			case 100:
+				pObj->m_bActive = false;
+				pObj->m_nFSM = 101;
+				break;
+			case 101:
+
+				break;
+			default:
+				break;
+			}
+		}
+
+		void Render(S_GAMEOBJECT *pObj, CHAR_INFO *pTargetBuf)
+		{
+			if (pObj->m_bActive) {
+				tge_sprite::put(pObj->m_pSprite,
+					irr::core::round32(pObj->m_posx + pObj->m_translation.X),
+					irr::core::round32(pObj->m_posy + pObj->m_translation.Y), pTargetBuf);
+			}
+		}
+	}
+
+	
+
+	
 
 	namespace attackObject_claw {
 		void Init(S_GAMEOBJECT *pObj, double _x, double _y, double _dbSpeed,
@@ -256,81 +336,167 @@ namespace cs2018prj {
 		}
 	}
 
-	namespace attackObject_frameBurster {
-		void Init(S_GAMEOBJECT *pObj, double _x, double _y, double _dbSpeed,
-			tge_sprite::S_SPRITE_OBJECT *pSpr)
-		{
-			pObj->m_posx = _x;
-			pObj->m_posy = _y;
-			pObj->m_dbSpeed = _dbSpeed;
-			pObj->m_nFSM = 0;
-			pObj->m_pSprite = pSpr;
-			pObj->m_vDir = irr::core::vector2df(1, 0);
-			pObj->m_pTargetObj = NULL;
-			pObj->m_bActive = false;
-		}
+	
 
-		void Apply(S_GAMEOBJECT *pObj, double _deltaTick)
-		{
-			switch (pObj->m_nFSM)
+		namespace attackObject_frameBurster {
+			void Init(S_GAMEOBJECT *pObj, double _x, double _y, double _dbSpeed,
+				tge_sprite::S_SPRITE_OBJECT *pSpr)
 			{
-			case 0:
-			
-				break;
-			case 10:
-				pObj->m_bActive = true;
-				pObj->m_nFSM = 11;
-				pObj->m_dbWorkTick = 0;
-				break;
-			case 11:
+				pObj->m_posx = _x;
+				pObj->m_posy = _y;
+				pObj->m_dbSpeed = _dbSpeed;
+				pObj->m_nFSM = 0;
+				pObj->m_pSprite = pSpr;
+				pObj->m_vDir = irr::core::vector2df(1, 0);
+				pObj->m_pTargetObj = NULL;
+				pObj->m_bActive = false;
+			}
+
+			void Apply(S_GAMEOBJECT *pObj, double _deltaTick)
 			{
-				pObj->m_dbWorkTick += _deltaTick;
-				pObj->m_posx += _deltaTick * pObj->m_dbSpeed * pObj->m_vDir.X;
-				pObj->m_posy += _deltaTick * pObj->m_dbSpeed * pObj->m_vDir.Y;
+				switch (pObj->m_nFSM)
+				{
+				case 0:
 
-				if (pObj->m_dbWorkTick > 5.0) {
-					pObj->m_nFSM = 0;
-					pObj->m_bActive = false;
-				}
-				if (pObj->m_pTargetObj) {
-					cs2018prj::ailenObject::S_GAMEOBJECT *pTargetObj =
-						(cs2018prj::ailenObject::S_GAMEOBJECT *)pObj->m_pTargetObj;
+					break;
+				case 10:
+					pObj->m_bActive = true;
+					pObj->m_nFSM = 11;
+					pObj->m_dbWorkTick = 0;
+					break;
+				case 11:
+				{
+					pObj->m_dbWorkTick += _deltaTick;
+					pObj->m_posx += _deltaTick * pObj->m_dbSpeed * pObj->m_vDir.X;
+					pObj->m_posy += _deltaTick * pObj->m_dbSpeed * pObj->m_vDir.Y;
 
-					irr::core::vector2df a = irr::core::vector2df(pObj->m_posx, pObj->m_posy);
-					irr::core::vector2df b =
-						irr::core::vector2df(pTargetObj->m_posx, pTargetObj->m_posy);
-
-					double fDist = a.getDistanceFrom(b);
-					//printf("%lf ", fDist);
-					if (fDist < 3) {
+					if (pObj->m_dbWorkTick > 5.0) {
 						pObj->m_nFSM = 0;
 						pObj->m_bActive = false;
-						pTargetObj->m_nFSM = 100;
+					}
+					if (pObj->m_pTargetObj) {
+
+						for (int i = 0; i < 5; i++) 
+						{
+							cs2018prj::ailenObject::S_GAMEOBJECT *pTargetObj =
+								&((cs2018prj::ailenObject::S_GAMEOBJECT *)pObj->m_pTargetObj)[i];
+
+							irr::core::vector2df a = irr::core::vector2df(pObj->m_posx, pObj->m_posy);
+							irr::core::vector2df b =
+							irr::core::vector2df(pTargetObj->m_posx, pTargetObj->m_posy);		
+											
+							double fDist = a.getDistanceFrom(b);
+							//printf("%lf ", fDist);
+							if (fDist < 5) {
+								pObj->m_nFSM = 0;
+								pObj->m_bActive = false;
+								pTargetObj->m_nFSM = 100;
+							}
+
+						}
+
 					}
 				}
-			}
-			break;
-			case 100:
-				
 				break;
+				case 100:
 
-			default:
-				break;
+					break;
+
+				default:
+					break;
+				}
 			}
 
+			void Render(S_GAMEOBJECT *pObj, CHAR_INFO *pTargetBuf)
+			{
+				if (pObj->m_bActive) {
+					tge_sprite::put(pObj->m_pSprite,
+						irr::core::round32(pObj->m_posx + pObj->m_translation.X),
+						irr::core::round32(pObj->m_posy + pObj->m_translation.Y), pTargetBuf);
+				}
 
+			}
 		}
 
-		void Render(S_GAMEOBJECT *pObj, CHAR_INFO *pTargetBuf)
-		{
-			if (pObj->m_bActive) {
-				tge_sprite::put(pObj->m_pSprite,
-					irr::core::round32(pObj->m_posx + pObj->m_translation.X),
-					irr::core::round32(pObj->m_posy + pObj->m_translation.Y), pTargetBuf);
+		namespace attackObject_poison {
+			void Init(S_GAMEOBJECT *pObj, double _x, double _y, double _dbSpeed,
+				tge_sprite::S_SPRITE_OBJECT *pSpr)
+			{
+				pObj->m_posx = _x;
+				pObj->m_posy = _y;
+				pObj->m_dbSpeed = _dbSpeed;
+				pObj->m_nFSM = 0;
+				pObj->m_pSprite = pSpr;
+				pObj->m_vDir = irr::core::vector2df(1, 0);
+				pObj->m_pTargetObj = NULL;
+				pObj->m_bActive = false;
 			}
 
+			void Apply(S_GAMEOBJECT *pObj, double _deltaTick)
+			{
+				switch (pObj->m_nFSM)
+				{
+				case 0:
+
+					break;
+				case 10:
+					pObj->m_bActive = true;
+					pObj->m_nFSM = 11;
+					pObj->m_dbWorkTick = 0;
+					break;
+				case 11:
+				{
+					pObj->m_dbWorkTick += _deltaTick;
+					pObj->m_posx += _deltaTick * pObj->m_dbSpeed * pObj->m_vDir.X;
+					pObj->m_posy += _deltaTick * pObj->m_dbSpeed * pObj->m_vDir.Y;
+
+					if (pObj->m_dbWorkTick > 5.0) {
+						pObj->m_nFSM = 0;
+						pObj->m_bActive = false;
+					}
+					if (pObj->m_pTargetObj) {
+
+						for (int i = 0; i < 5; i++)
+						{
+							cs2018prj::mapObject::S_GAMEOBJECT *pTargetObj =
+								&((cs2018prj::mapObject::S_GAMEOBJECT *)pObj->m_pTargetObj)[i];
+
+							irr::core::vector2df a = irr::core::vector2df(pObj->m_posx, pObj->m_posy);
+							irr::core::vector2df b =
+							irr::core::vector2df(pTargetObj->m_posx, pTargetObj->m_posy);
+
+							double fDist = a.getDistanceFrom(b);
+							//printf("%lf ", fDist);
+							if (fDist < 5) {
+								pObj->m_nFSM = 0;
+								pObj->m_bActive = false;
+								pTargetObj->m_nFSM = 100;
+							}
+
+						}
+
+					}
+				}
+				break;
+				case 100:
+
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			void Render(S_GAMEOBJECT *pObj, CHAR_INFO *pTargetBuf)
+			{
+				if (pObj->m_bActive) {
+					tge_sprite::put(pObj->m_pSprite,
+						irr::core::round32(pObj->m_posx + pObj->m_translation.X),
+						irr::core::round32(pObj->m_posy + pObj->m_translation.Y), pTargetBuf);
+				}
+
+			}
 		}
-	}
 
-
+		
 }
